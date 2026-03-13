@@ -1,0 +1,9 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#F0EDE8"/>
+  <rect x="250" y="100" width="300" height="400" rx="6" fill="#1B2B4B"/>
+  <rect x="250" y="100" width="300" height="120" fill="#C4964A" opacity="0.3"/>
+  <path d="M380 300L400 340H360L380 300Z" fill="#FAFAF8"/>
+  <rect x="368" y="326" width="24" height="2" rx="1" fill="#1B2B4B"/>
+  <text x="400" y="400" fill="#FAFAF8" font-family="system-ui, sans-serif" font-size="12" font-weight="600" letter-spacing="4" text-anchor="middle">ACME STUDIO</text>
+  <text x="400" y="560" fill="#8A8885" font-family="system-ui, sans-serif" font-size="14" text-anchor="middle">Packaging</text>
+</svg>

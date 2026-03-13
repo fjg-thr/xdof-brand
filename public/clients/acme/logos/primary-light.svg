@@ -1,0 +1,5 @@
+<svg width="360" height="80" viewBox="0 0 360 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M40 6L76 74H4L40 6Z" fill="#FAFAF8"/>
+  <rect x="18" y="50" width="44" height="3" rx="1.5" fill="#1B2B4B"/>
+  <text x="92" y="48" fill="#FAFAF8" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="600" letter-spacing="6">ACME STUDIO</text>
+</svg>

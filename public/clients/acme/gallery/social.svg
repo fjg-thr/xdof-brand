@@ -1,0 +1,11 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#7C9082"/>
+  <rect x="200" y="100" width="400" height="400" rx="12" fill="#FAFAF8"/>
+  <path d="M370 220L400 280H340L370 220Z" fill="#1B2B4B"/>
+  <rect x="354" y="258" width="32" height="2" rx="1" fill="#FAFAF8"/>
+  <rect x="290" y="320" width="220" height="3" rx="1.5" fill="#1B2B4B" opacity="0.12"/>
+  <rect x="310" y="340" width="180" height="2" rx="1" fill="#1B2B4B" opacity="0.08"/>
+  <rect x="320" y="356" width="160" height="2" rx="1" fill="#1B2B4B" opacity="0.08"/>
+  <rect x="290" y="400" width="80" height="28" rx="14" fill="#C4964A" opacity="0.8"/>
+  <text x="400" y="560" fill="#FAFAF8" opacity="0.7" font-family="system-ui, sans-serif" font-size="14" text-anchor="middle">Social Media</text>
+</svg>

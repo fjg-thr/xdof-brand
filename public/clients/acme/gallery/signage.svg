@@ -1,0 +1,8 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#3A3A38"/>
+  <rect x="100" y="140" width="600" height="320" rx="0" fill="#1B2B4B"/>
+  <path d="M360 230L400 310H320L360 230Z" fill="#FAFAF8"/>
+  <rect x="340" y="280" width="40" height="3" rx="1.5" fill="#1B2B4B"/>
+  <text x="400" y="370" fill="#FAFAF8" font-family="system-ui, sans-serif" font-size="16" font-weight="600" letter-spacing="6" text-anchor="middle">ACME STUDIO</text>
+  <text x="400" y="560" fill="#8A8885" font-family="system-ui, sans-serif" font-size="14" text-anchor="middle">Environmental Signage</text>
+</svg>

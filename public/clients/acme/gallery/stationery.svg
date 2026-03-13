@@ -1,0 +1,14 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#FAFAF8"/>
+  <rect x="200" y="60" width="400" height="480" rx="4" fill="white" stroke="#E8E5E0" stroke-width="1"/>
+  <path d="M280 120L296 152H264L280 120Z" fill="#1B2B4B"/>
+  <rect x="270" y="140" width="20" height="2" rx="1" fill="#FAFAF8"/>
+  <rect x="240" y="180" width="160" height="3" rx="1.5" fill="#1B2B4B" opacity="0.08"/>
+  <rect x="240" y="200" width="320" height="2" rx="1" fill="#1B2B4B" opacity="0.05"/>
+  <rect x="240" y="216" width="300" height="2" rx="1" fill="#1B2B4B" opacity="0.05"/>
+  <rect x="240" y="232" width="280" height="2" rx="1" fill="#1B2B4B" opacity="0.05"/>
+  <rect x="240" y="248" width="310" height="2" rx="1" fill="#1B2B4B" opacity="0.05"/>
+  <rect x="240" y="264" width="200" height="2" rx="1" fill="#1B2B4B" opacity="0.05"/>
+  <rect x="200" y="480" width="400" height="2" fill="#C4964A" opacity="0.4"/>
+  <text x="400" y="560" fill="#8A8885" font-family="system-ui, sans-serif" font-size="14" text-anchor="middle">Stationery</text>
+</svg>

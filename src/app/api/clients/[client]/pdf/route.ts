@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
-import { chromium } from "playwright"
+import chromiumBinary from "@sparticuz/chromium"
+import { chromium } from "playwright-core"
 import { getClient } from "@/lib/clients"
 
 process.env.PLAYWRIGHT_BROWSERS_PATH = process.env.PLAYWRIGHT_BROWSERS_PATH ?? "0"
@@ -10,6 +11,19 @@ interface RouteContext {
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
+export const maxDuration = 60
+
+async function getLaunchOptions() {
+  if (process.env.VERCEL) {
+    return {
+      args: chromiumBinary.args,
+      executablePath: await chromiumBinary.executablePath(),
+      headless: true,
+    }
+  }
+
+  return { headless: true }
+}
 
 function buildOrigin(request: Request): string {
   const envOrigin = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL
@@ -32,7 +46,7 @@ export async function GET(request: Request, context: RouteContext) {
 
   let browser: Awaited<ReturnType<typeof chromium.launch>> | null = null
   try {
-    browser = await chromium.launch({ headless: true })
+    browser = await chromium.launch(await getLaunchOptions())
     const page = await browser.newPage()
     const origin = buildOrigin(request)
     const targetUrl = `${origin}/print/${client}`
@@ -72,8 +86,8 @@ export async function GET(request: Request, context: RouteContext) {
   } catch (error) {
     console.error("PDF generation failed", error)
     const message =
-      error instanceof Error && /Executable doesn't exist/i.test(error.message)
-        ? "PDF engine is missing. Run `npx playwright install chromium` and try again."
+      error instanceof Error && /executable|browser/i.test(error.message)
+        ? "PDF engine is unavailable in this environment. Verify server deployment includes a headless Chromium binary."
         : "Failed to generate PDF"
     return NextResponse.json(
       { error: message },

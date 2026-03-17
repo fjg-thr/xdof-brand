@@ -89,6 +89,10 @@ export function SidebarNav({ client }: SidebarNavProps) {
 
   const sidebarGradientClass =
     "bg-[linear-gradient(180deg,_#D9D9EA_0%,_#CAD5E1_100%)] dark:bg-[linear-gradient(180deg,_#121218_0%,_#171725_100%)]"
+  const downloadButtonClass = cn(
+    buttonVariants({ variant: "outline", size: "lg" }),
+    "w-full justify-center border-border/70 bg-background/70 text-foreground backdrop-blur-sm transition-colors duration-200 hover:bg-background/90"
+  )
 
   return (
     <>
@@ -109,18 +113,12 @@ export function SidebarNav({ client }: SidebarNavProps) {
           <AgentSkillDownloadButton
             clientSlug={client.slug}
             clientName={client.name}
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "lg" }),
-              "mb-2 w-full justify-center border border-border/60 bg-background/65 text-foreground shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-px hover:bg-background"
-            )}
+            className={cn(downloadButtonClass, "mb-2")}
           />
           <PdfDownloadButton
             clientSlug={client.slug}
             clientName={client.name}
-            className={cn(
-              buttonVariants({ variant: "outline", size: "lg" }),
-              "w-full justify-center border-border/70 bg-background/80 text-foreground dark:bg-background/45 dark:text-foreground shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-px hover:bg-background hover:shadow-md dark:hover:bg-background/60"
-            )}
+            className={downloadButtonClass}
           />
         </div>
       </aside>

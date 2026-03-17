@@ -51,9 +51,25 @@ export async function GET(request: Request, context: RouteContext) {
     const origin = buildOrigin(request)
     const targetUrl = `${origin}/print/${client}`
 
-    await page.goto(targetUrl, { waitUntil: "networkidle" })
+    page.setDefaultTimeout(45_000)
+    const response = await page.goto(targetUrl, {
+      waitUntil: "domcontentloaded",
+      timeout: 45_000,
+    })
+    if (!response || response.status() >= 400) {
+      throw new Error(`Could not load print page (${response?.status() ?? "no response"})`)
+    }
     await page.emulateMedia({ media: "print" })
-    await page.waitForFunction(() => document.fonts?.status === "loaded")
+    await page.waitForFunction(() => document.fonts?.status === "loaded", {
+      timeout: 15_000,
+    })
+    await page
+      .waitForFunction(() => Array.from(document.images).every((img) => img.complete), {
+        timeout: 20_000,
+      })
+      .catch(() => {
+        // Some assets can load slowly or be blocked in production; continue with current page state.
+      })
 
     const pdfBuffer = await page.pdf({
       printBackground: true,
@@ -85,12 +101,15 @@ export async function GET(request: Request, context: RouteContext) {
     })
   } catch (error) {
     console.error("PDF generation failed", error)
+    const errorMessage = error instanceof Error ? error.message : "Unknown error"
     const message =
-      error instanceof Error && /executable|browser/i.test(error.message)
+      /executable|browser/i.test(errorMessage)
         ? "PDF engine is unavailable in this environment. Verify server deployment includes a headless Chromium binary."
+        : /timeout|Could not load print page/i.test(errorMessage)
+          ? "PDF rendering timed out while loading brand assets. Try again in a moment."
         : "Failed to generate PDF"
     return NextResponse.json(
-      { error: message },
+      { error: message, details: errorMessage },
       { status: 500 }
     )
   } finally {

@@ -287,7 +287,7 @@ export async function GET(request: Request, context: RouteContext) {
   )
 
   const zipBuffer = await zip.generateAsync({
-    type: "uint8array",
+    type: "arraybuffer",
     compression: "DEFLATE",
     compressionOptions: { level: 9 },
   })

@@ -1,9 +1,7 @@
 "use client"
 
 import { useCallback, useMemo, useState } from "react"
-import { cn } from "@/lib/utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LogoDownloadMenu } from "./logo-download-menu"
 import type { SocialAssets, BannerVariant } from "@/lib/schema"
 
 interface SocialAssetsGridProps {
@@ -197,11 +195,7 @@ function BannerPreview({ banner }: { banner: BannerVariant }) {
         )}
         <div className="absolute bottom-3 right-3 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
           {hasSrc ? (
-            <LogoDownloadMenu
-              svgUrl={banner.src!}
-              name={`xdof-${banner.platform.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${banner.label.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}
-              floating
-            />
+            <SourceBannerDownload banner={banner} />
           ) : (
             <GeneratedBannerDownload banner={banner} />
           )}
@@ -244,8 +238,53 @@ function GeneratedBannerPreview({ banner }: { banner: BannerVariant }) {
   )
 }
 
+function SourceBannerDownload({ banner }: { banner: BannerVariant }) {
+  const slug = `xdof-${banner.tab.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${banner.label.toLowerCase().replace(/[^a-z0-9]/g, "-")}`
+
+  const download = useCallback(async () => {
+    if (!banner.src) return
+
+    const img = new Image()
+    img.crossOrigin = "anonymous"
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve()
+      img.onerror = reject
+      img.src = banner.src!
+    })
+
+    const canvas = document.createElement("canvas")
+    canvas.width = banner.width
+    canvas.height = banner.height
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    ctx.drawImage(img, 0, 0, banner.width, banner.height)
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/png")
+    )
+    if (!blob) return
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `${slug}-${banner.width}x${banner.height}.png`
+    link.click()
+    URL.revokeObjectURL(url)
+  }, [banner, slug])
+
+  return (
+    <button
+      onClick={download}
+      className="inline-flex items-center gap-1.5 rounded-lg border border-black/10 bg-white px-3 py-1.5 text-sm font-medium text-black shadow-md transition-colors hover:bg-gray-50"
+    >
+      Download PNG
+    </button>
+  )
+}
+
 function GeneratedBannerDownload({ banner }: { banner: BannerVariant }) {
-  const slug = `xdof-${banner.platform.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${banner.label.toLowerCase().replace(/[^a-z0-9]/g, "-")}`
+  const slug = `xdof-${banner.tab.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${banner.label.toLowerCase().replace(/[^a-z0-9]/g, "-")}`
   const [from, to] = banner.bgGradient ?? ["#121218", "#171725"]
 
   const loadImg = useCallback(async (src: string) => {

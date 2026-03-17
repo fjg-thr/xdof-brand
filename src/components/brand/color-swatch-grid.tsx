@@ -5,6 +5,13 @@ import { Check, Copy } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCopy } from "@/hooks"
 import { formatColor, COLOR_FORMATS } from "@/lib/color"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import type { ColorPalette, ColorGroup, ColorEntry } from "@/lib/schema"
 
 interface ColorSwatchGridProps {
@@ -18,73 +25,55 @@ export function ColorSwatchGrid({
   readOnly = false,
   printMode = false,
 }: ColorSwatchGridProps) {
-  const [showAllShades, setShowAllShades] = useState(false)
-  const [expandedShades, setExpandedShades] = useState<Set<string>>(new Set())
-
-  const handleToggleColorShades = (colorId: string) => {
-    setExpandedShades((current) => {
-      const next = new Set(current)
-      if (next.has(colorId)) next.delete(colorId)
-      else next.add(colorId)
-      return next
-    })
-  }
-
-  const handleToggleAllShades = () => {
-    setExpandedShades(new Set())
-    setShowAllShades((current) => !current)
-  }
+  const { selectedColor, openShades, closeShades, setDialogOpen } = useShadeModal()
 
   return (
     <div className="space-y-14">
-      {!readOnly && (
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
-          <p className="text-sm text-muted-foreground">
-            Shades are hidden by default to keep scanning fast.
-          </p>
-          <button
-            onClick={handleToggleAllShades}
-            className={cn(
-              "inline-flex cursor-pointer items-center rounded-md border px-2.5 py-1 text-xs font-medium transition-colors",
-              "border-border/70 bg-background hover:bg-muted/60"
-            )}
-            aria-label={showAllShades ? "Hide all shades" : "Show all shades"}
-          >
-            {showAllShades ? "Hide all shades" : "Show all shades"}
-          </button>
-        </div>
-      )}
       {palette.groups.map((group) => (
         <ColorGroupBlock
           key={group.name}
           group={group}
           readOnly={readOnly}
           printMode={printMode}
-          showAllShades={showAllShades}
-          expandedShades={expandedShades}
-          onToggleColorShades={handleToggleColorShades}
+          onOpenShadeModal={openShades}
         />
       ))}
+      {!readOnly && (
+        <ShadeScaleDialog
+          color={selectedColor}
+          open={!!selectedColor}
+          onOpenChange={setDialogOpen}
+          onClose={closeShades}
+        />
+      )}
     </div>
   )
+}
+
+function useShadeModal() {
+  const [selectedColor, setSelectedColor] = useState<ColorEntry | null>(null)
+
+  const openShades = (color: ColorEntry) => setSelectedColor(color)
+  const closeShades = () => setSelectedColor(null)
+  const setDialogOpen = (open: boolean) => {
+    if (!open) closeShades()
+  }
+
+  return { selectedColor, openShades, closeShades, setDialogOpen }
 }
 
 interface ColorGroupBlockProps {
   group: ColorGroup
   readOnly: boolean
   printMode: boolean
-  showAllShades: boolean
-  expandedShades: Set<string>
-  onToggleColorShades: (colorId: string) => void
+  onOpenShadeModal: (color: ColorEntry) => void
 }
 
 function ColorGroupBlock({
   group,
   readOnly,
   printMode,
-  showAllShades,
-  expandedShades,
-  onToggleColorShades,
+  onOpenShadeModal,
 }: ColorGroupBlockProps) {
   const gridStyle = printMode
     ? { gridTemplateColumns: `repeat(${Math.max(group.colors.length, 1)}, minmax(0, 1fr))` }
@@ -103,24 +92,16 @@ function ColorGroupBlock({
         )}
         style={gridStyle}
       >
-        {group.colors.map((color) => {
-          const colorId = `${group.name}:${color.name}:${color.hex}`
-          const supportsShades = !isNeutralGroup(group.name)
-          const showShades =
-            supportsShades && (showAllShades || expandedShades.has(colorId))
-          return (
-            <ColorSwatch
-              key={colorId}
-              color={color}
-              readOnly={readOnly}
-              printMode={printMode}
-              supportsShades={supportsShades}
-              showShades={showShades}
-              showAllShades={showAllShades}
-              onToggleShades={() => onToggleColorShades(colorId)}
-            />
-          )
-        })}
+        {group.colors.map((color) => (
+          <ColorSwatch
+            key={`${group.name}:${color.name}:${color.hex}`}
+            color={color}
+            readOnly={readOnly}
+            printMode={printMode}
+            supportsShades={!isNeutralGroup(group.name)}
+            onOpenShades={() => onOpenShadeModal(color)}
+          />
+        ))}
       </div>
     </div>
   )
@@ -131,9 +112,7 @@ interface ColorSwatchProps {
   readOnly: boolean
   printMode?: boolean
   supportsShades: boolean
-  showShades: boolean
-  showAllShades: boolean
-  onToggleShades: () => void
+  onOpenShades: () => void
 }
 
 function ColorSwatch({
@@ -141,19 +120,16 @@ function ColorSwatch({
   readOnly,
   printMode = false,
   supportsShades,
-  showShades,
-  showAllShades,
-  onToggleShades,
+  onOpenShades,
 }: ColorSwatchProps) {
   const { copy, isCopied } = useCopy()
   const isLight = isLightColor(color.hex)
-  const shades = useMemo(() => buildShadeScale(color.hex), [color.hex])
 
   return (
     <div className="group">
       <div
         className={cn(
-          printMode ? "aspect-[3/2] rounded-md ring-1 ring-border/35" : "aspect-[4/3] rounded-lg ring-1 ring-border/40",
+          printMode ? "aspect-3/2 rounded-md ring-1 ring-border/35" : "aspect-4/3 rounded-lg ring-1 ring-border/40",
           isLight && "ring-border/60"
         )}
         style={{ backgroundColor: color.hex }}
@@ -180,57 +156,108 @@ function ColorSwatch({
         )}
         {!readOnly && supportsShades && (
           <button
-            onClick={onToggleShades}
-            disabled={showAllShades}
+            onClick={onOpenShades}
             className={cn(
               "inline-flex w-full cursor-pointer items-center justify-center rounded px-1.5 py-1 text-[11px] transition-colors",
-              "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground",
-              showAllShades &&
-                "cursor-not-allowed bg-muted/30 text-muted-foreground/70 hover:bg-muted/30 hover:text-muted-foreground/70"
+              "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
-            aria-label={
-              showAllShades
-                ? `Shades for ${color.name} are shown globally`
-                : showShades
-                  ? `Hide shades for ${color.name}`
-                  : `Show shades for ${color.name}`
-            }
+            aria-label={`Open shades for ${color.name}`}
           >
-            {showAllShades ? "Shown globally" : showShades ? "Hide shades" : "Show shades"}
+            View shades
           </button>
         )}
-        {showShades && (
-          <div className="space-y-2 rounded-md border border-border/60 p-2">
+      </div>
+    </div>
+  )
+}
+
+function ShadeScaleDialog({
+  color,
+  open,
+  onOpenChange,
+  onClose,
+}: {
+  color: ColorEntry | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onClose: () => void
+}) {
+  const shades = useMemo(() => buildShadeScale(color?.hex ?? ""), [color?.hex])
+  const { copy, isCopied } = useCopy()
+
+  if (!color) return null
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] max-w-[calc(100%-1rem)] gap-0 overflow-hidden p-0 sm:max-w-4xl">
+        <DialogHeader className="border-b border-border/60 px-5 py-4">
+          <DialogTitle>{color.name} Shades</DialogTitle>
+          <DialogDescription>Expanded shade scale for {color.hex.toUpperCase()}</DialogDescription>
+        </DialogHeader>
+        <div className="overflow-y-auto p-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {shades.map((shade) => (
-              <div
+              <ShadeCard
                 key={`${color.hex}-${shade.label}`}
-                className="flex min-h-28 w-full flex-col justify-between overflow-hidden rounded-md border border-border/60 bg-background"
-                aria-label={`${color.name} shade ${shade.label}`}
-              >
-                <div
-                  className="h-14 w-full ring-1 ring-inset ring-border/40"
-                  style={{ backgroundColor: shade.hex }}
-                />
-                <div className="space-y-2 p-2">
-                  <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                    <span>{shade.label}</span>
-                    <span className="font-mono uppercase">{shade.hex}</span>
-                  </div>
-                  <CopyFormatButtons
-                    value={shade.hex}
-                    orientation="row"
-                    copy={copy}
-                    isCopied={isCopied}
-                    readOnly={readOnly}
-                    size={readOnly ? "text" : "shade"}
-                    variant={readOnly ? "text" : "check"}
-                    labelPrefix={`${color.name} shade ${shade.label}`}
-                  />
-                </div>
-              </div>
+                colorName={color.name}
+                label={shade.label}
+                hex={shade.hex}
+                copy={copy}
+                isCopied={isCopied}
+              />
             ))}
           </div>
-        )}
+        </div>
+        <div className="border-t border-border/60 p-4">
+          <button
+            onClick={onClose}
+            className="inline-flex w-full cursor-pointer items-center justify-center rounded-md border border-border/70 bg-background px-3 py-2 text-sm font-medium transition-colors hover:bg-muted/60 sm:w-auto"
+            aria-label="Close shades dialog"
+          >
+            Close
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function ShadeCard({
+  colorName,
+  label,
+  hex,
+  copy,
+  isCopied,
+}: {
+  colorName: string
+  label: string
+  hex: string
+  copy: (value: string, options?: { successMessage?: string }) => Promise<void>
+  isCopied: (value: string) => boolean
+}) {
+  return (
+    <div
+      className="flex min-h-32 w-full flex-col justify-between overflow-hidden rounded-md border border-border/60 bg-background"
+      aria-label={`${colorName} shade ${label}`}
+    >
+      <div
+        className="h-16 w-full ring-1 ring-inset ring-border/40"
+        style={{ backgroundColor: hex }}
+      />
+      <div className="space-y-2 p-2">
+        <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+          <span>{label}</span>
+          <span className="font-mono uppercase">{hex}</span>
+        </div>
+        <CopyFormatButtons
+          value={hex}
+          orientation="row"
+          copy={copy}
+          isCopied={isCopied}
+          size="shade"
+          variant="check"
+          labelPrefix={`${colorName} shade ${label}`}
+        />
       </div>
     </div>
   )

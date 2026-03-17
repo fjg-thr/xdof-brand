@@ -48,7 +48,7 @@ function RuleColumn({
         {icon}
         {heading}
       </h3>
-      <div className="space-y-4">
+      <div className="grid auto-rows-fr gap-4">
         {rules.map((rule) => (
           <RuleCard key={rule.label} rule={rule} />
         ))}
@@ -59,7 +59,7 @@ function RuleColumn({
 
 function RuleCard({ rule }: { rule: GuidanceRule }) {
   return (
-    <div className="rounded-lg border border-border/50 bg-card p-4">
+    <div className="flex h-full min-h-28 flex-col rounded-lg border border-border/50 bg-card p-4">
       {rule.imageSrc && (
         <div className="mb-3 overflow-hidden rounded">
           <img src={rule.imageSrc} alt={rule.label} className="w-full" />

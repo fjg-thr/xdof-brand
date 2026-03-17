@@ -21,7 +21,7 @@ export function ContactSection({ contact }: ContactSectionProps) {
         {contact.email && (
           <a
             href={`mailto:${contact.email}`}
-            className="flex items-center gap-3 text-sm transition-colors hover:text-primary"
+            className="flex items-center gap-3 text-sm text-[#6C6DB0] transition-opacity hover:opacity-70"
           >
             <Mail className="h-4 w-4 text-muted-foreground" />
             {contact.email}
@@ -42,7 +42,7 @@ export function ContactSection({ contact }: ContactSectionProps) {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 text-sm transition-colors hover:text-primary"
+            className="flex items-center gap-3 text-sm text-[#6C6DB0] transition-opacity hover:opacity-70"
           >
             <ExternalLink className="h-4 w-4 text-muted-foreground" />
             {link.label}

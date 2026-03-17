@@ -16,7 +16,7 @@ export function BrandHeader({
   return (
     <div>
       <div className="max-w-3xl">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-[#6C6DB0]">
           Brand Guidelines
         </p>
         <h1 className="sr-only">{overview.headline}</h1>

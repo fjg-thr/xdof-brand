@@ -562,7 +562,8 @@ export const xdofConfig: ClientConfig = {
           description:
             "Standard deck layout with XDOF brand typography, colors, and slide masters.",
           type: "google-slides",
-          url: "https://docs.google.com/presentation/d/example",
+          url: "https://docs.google.com/presentation/d/1HGd9gmtVkTDX3BJ7wG8k7QYOJpM4OKH6yX5YMIV_n_s/edit?slide=id.g3d0978ed133_0_6#slide=id.g3d0978ed133_0_6",
+          previewUrl: "/clients/xdof/templates/xdof-presentation-template-thumbnail.png",
         },
       ],
     },

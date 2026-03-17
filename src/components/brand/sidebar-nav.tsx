@@ -106,6 +106,14 @@ export function SidebarNav({ client }: SidebarNavProps) {
         </ScrollArea>
         <Separator />
         <div className="px-3 py-4">
+          <AgentSkillDownloadButton
+            clientSlug={client.slug}
+            clientName={client.name}
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "lg" }),
+              "mb-2 w-full justify-center border border-border/60 bg-background/65 text-foreground shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-px hover:bg-background"
+            )}
+          />
           <PdfDownloadButton
             clientSlug={client.slug}
             clientName={client.name}
@@ -214,8 +222,70 @@ function PdfDownloadButton({
       disabled={isDownloading}
       aria-label={`Download ${clientName} brand guidelines PDF`}
     >
-      {isDownloading ? <Loader2 className="size-4 animate-spin" /> : <FileDown className="size-4" />}
-      {isDownloading ? "Preparing PDF..." : "Download PDF"}
+      <span className="flex w-full items-center justify-between">
+        <span>{isDownloading ? "Preparing PDF..." : "Download PDF"}</span>
+        {isDownloading ? <Loader2 className="size-4 animate-spin" /> : <FileDown className="size-4" />}
+      </span>
+    </Button>
+  )
+}
+
+function AgentSkillDownloadButton({
+  clientSlug,
+  clientName,
+  className,
+}: {
+  clientSlug: string
+  clientName: string
+  className?: string
+}) {
+  const [isDownloading, setIsDownloading] = useState(false)
+
+  const handleDownload = async () => {
+    if (isDownloading) return
+    setIsDownloading(true)
+
+    try {
+      const response = await fetch(`/api/clients/${clientSlug}/skill`)
+      if (!response.ok) {
+        const fallback = "Could not generate agent package"
+        const json = (await response.json().catch(() => null)) as
+          | { error?: string; details?: string }
+          | null
+        throw new Error(
+          [json?.error, json?.details].filter(Boolean).join(" — ") || fallback
+        )
+      }
+
+      const blob = await response.blob()
+      const href = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = href
+      link.download = getFileNameFromHeaders(response.headers) ?? `${clientSlug}-brand-guidelines-skill-package.zip`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(href)
+      toast.success("Agent package download started")
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Agent package generation failed"
+      toast.error(message)
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
+  return (
+    <Button
+      onClick={handleDownload}
+      className={className}
+      disabled={isDownloading}
+      aria-label={`Download ${clientName} brand guidelines skill package for coding agents`}
+    >
+      <span className="flex w-full items-center justify-between">
+        <span>{isDownloading ? "Preparing Package..." : "Download Agent Package"}</span>
+        {isDownloading ? <Loader2 className="size-4 animate-spin" /> : <FileDown className="size-4" />}
+      </span>
     </Button>
   )
 }

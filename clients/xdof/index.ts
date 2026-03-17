@@ -132,7 +132,7 @@ export const xdofConfig: ClientConfig = {
       ],
       buildDiagramSrc: "/clients/xdof/logos/wordmark-build.svg",
       guidelines: [
-        "Always use the provided SVG files. Never recreate or redraw the logo.",
+        "Always use the provided SVG or PNG files. Never recreate or redraw the logo.",
         "Maintain minimum clear space equal to the height of one grid square in the logo mark on all sides.",
         "Do not rotate, skew, stretch, or distort the logo or wordmark.",
         "Do not alter the logo fill colors outside of the approved dark (#121218) and light (#D8D9E9) variants.",
@@ -603,7 +603,7 @@ export const xdofConfig: ClientConfig = {
           type: "do",
           label: "Use approved logo files",
           description:
-            "Always use the provided SVG files. Never recreate, trace, or screenshot the logo.",
+            "Always use the provided SVG or PNG files. Never recreate, trace, or screenshot the logo.",
         },
         {
           type: "do",

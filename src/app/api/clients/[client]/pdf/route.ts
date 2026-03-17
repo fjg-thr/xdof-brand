@@ -25,6 +25,16 @@ async function getLaunchOptions() {
   return { headless: true }
 }
 
+function getProtectionBypassHeaders(): Record<string, string> {
+  const secret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+  if (!secret) return {}
+
+  return {
+    "x-vercel-protection-bypass": secret,
+    "x-vercel-set-bypass-cookie": "true",
+  }
+}
+
 function buildOrigin(request: Request): string {
   const envOrigin = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL
   if (envOrigin) return envOrigin.replace(/\/$/, "")
@@ -47,7 +57,10 @@ export async function GET(request: Request, context: RouteContext) {
   let browser: Awaited<ReturnType<typeof chromium.launch>> | null = null
   try {
     browser = await chromium.launch(await getLaunchOptions())
-    const page = await browser.newPage()
+    const browserContext = await browser.newContext({
+      extraHTTPHeaders: getProtectionBypassHeaders(),
+    })
+    const page = await browserContext.newPage()
     const origin = buildOrigin(request)
     const targetUrl = `${origin}/print/${client}`
 
@@ -105,6 +118,8 @@ export async function GET(request: Request, context: RouteContext) {
     const message =
       /executable|browser/i.test(errorMessage)
         ? "PDF engine is unavailable in this environment. Verify server deployment includes a headless Chromium binary."
+        : /401|403|Could not load print page/i.test(errorMessage)
+          ? "PDF renderer cannot access the protected site. Verify Vercel automation bypass is enabled."
         : /timeout|Could not load print page/i.test(errorMessage)
           ? "PDF rendering timed out while loading brand assets. Try again in a moment."
         : "Failed to generate PDF"

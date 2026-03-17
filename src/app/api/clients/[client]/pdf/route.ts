@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs"
+import path from "node:path"
 import { NextResponse } from "next/server"
 import chromiumBinary from "@sparticuz/chromium"
 import { chromium } from "playwright-core"
@@ -15,9 +17,20 @@ export const maxDuration = 60
 
 async function getLaunchOptions() {
   if (process.env.VERCEL) {
+    const bundledBinPath = path.join(
+      process.cwd(),
+      "node_modules",
+      "@sparticuz",
+      "chromium",
+      "bin"
+    )
+    const executablePath = existsSync(bundledBinPath)
+      ? await chromiumBinary.executablePath(bundledBinPath)
+      : await chromiumBinary.executablePath()
+
     return {
       args: chromiumBinary.args,
-      executablePath: await chromiumBinary.executablePath(),
+      executablePath,
       headless: true,
     }
   }

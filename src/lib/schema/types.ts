@@ -10,6 +10,7 @@ export interface ClientConfig {
   tagline?: string
   description?: string
   logoSrc?: string
+  logoLightSrc?: string
   wordmarkSrc?: string
   wordmarkLightSrc?: string
   sections: SectionMeta[]

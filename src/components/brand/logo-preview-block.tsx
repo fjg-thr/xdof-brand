@@ -5,6 +5,7 @@ import type { LogoSystem, LogoVariant, LogoBackground } from "@/lib/schema"
 
 interface LogoPreviewBlockProps {
   logos: LogoSystem
+  printMode?: boolean
 }
 
 const BG_CONFIG: Record<
@@ -64,13 +65,14 @@ function pairVariants(variants: LogoVariant[]): VariantPair[] {
   return pairs
 }
 
-export function LogoPreviewBlock({ logos }: LogoPreviewBlockProps) {
+export function LogoPreviewBlock({ logos, printMode = false }: LogoPreviewBlockProps) {
   const pairs = pairVariants(logos.variants)
+  const showSeparateInstructionBlocks = !printMode
 
   return (
     <div className="space-y-16">
       {pairs.map((pair) => (
-        <div key={pair.label}>
+        <div key={pair.label} className={cn(printMode && "pdf-subsection-page")}>
           <div className="mb-5">
             <h3 className="text-lg font-medium">{pair.label}</h3>
             {pair.description && (
@@ -98,7 +100,7 @@ export function LogoPreviewBlock({ logos }: LogoPreviewBlockProps) {
                       alt={`${pair.label} on ${cfg.label} background`}
                       className="max-h-[80px] max-w-full object-contain"
                     />
-                    {variant.downloadUrl && (
+                    {variant.downloadUrl && !printMode && (
                       <div className="absolute bottom-3 right-3 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
                         <LogoDownloadMenu
                           svgUrl={variant.downloadUrl}
@@ -119,7 +121,7 @@ export function LogoPreviewBlock({ logos }: LogoPreviewBlockProps) {
       ))}
 
       {logos.buildDiagramSrc && (
-        <div>
+        <div className={cn(printMode && "pdf-subsection-page")}>
           <h3 className="mb-4 text-lg font-medium">Wordmark Construction</h3>
           <div className="overflow-hidden rounded-lg border border-border/30 bg-muted/30 px-6 py-5">
             <img
@@ -134,11 +136,51 @@ export function LogoPreviewBlock({ logos }: LogoPreviewBlockProps) {
               className="mx-auto hidden w-full max-w-lg object-contain dark:block"
             />
           </div>
+          {printMode && (logos.guidelines?.length || logos.clearSpace || logos.minimumSize) && (
+            <div className="mt-5 grid grid-cols-1 gap-6">
+              {logos.guidelines && logos.guidelines.length > 0 && (
+                <div>
+                  <h4 className="mb-2 text-sm font-medium">Logo Usage Guidelines</h4>
+                  <ul className="space-y-1.5">
+                    {logos.guidelines.map((g, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-2.5 text-xs leading-relaxed text-muted-foreground"
+                      >
+                        <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-foreground/40" />
+                        {g}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {(logos.clearSpace || logos.minimumSize) && (
+                <div className="grid grid-cols-2 gap-6">
+                  {logos.clearSpace && (
+                    <div>
+                      <h4 className="mb-1 text-sm font-medium">Clear Space</h4>
+                      <p className="text-xs leading-relaxed text-muted-foreground">
+                        {logos.clearSpace}
+                      </p>
+                    </div>
+                  )}
+                  {logos.minimumSize && (
+                    <div>
+                      <h4 className="mb-1 text-sm font-medium">Minimum Size</h4>
+                      <p className="text-xs leading-relaxed text-muted-foreground">
+                        {logos.minimumSize}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
-      {logos.guidelines && logos.guidelines.length > 0 && (
-        <div>
+      {showSeparateInstructionBlocks && logos.guidelines && logos.guidelines.length > 0 && (
+        <div className={cn(printMode && "pdf-subsection-page")}>
           <h3 className="mb-4 text-lg font-medium">Logo Usage Guidelines</h3>
           <ul className="space-y-2">
             {logos.guidelines.map((g, i) => (
@@ -154,8 +196,8 @@ export function LogoPreviewBlock({ logos }: LogoPreviewBlockProps) {
         </div>
       )}
 
-      {(logos.clearSpace || logos.minimumSize) && (
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+      {showSeparateInstructionBlocks && (logos.clearSpace || logos.minimumSize) && (
+        <div className={cn("grid grid-cols-1 gap-8 md:grid-cols-2", printMode && "pdf-subsection-page")}>
           {logos.clearSpace && (
             <div>
               <h4 className="mb-2 text-sm font-medium">Clear Space</h4>

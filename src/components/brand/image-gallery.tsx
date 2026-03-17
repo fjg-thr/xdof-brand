@@ -9,9 +9,10 @@ import type { GalleryCollection } from "@/lib/schema"
 
 interface ImageGalleryProps {
   gallery: GalleryCollection
+  printMode?: boolean
 }
 
-export function ImageGallery({ gallery }: ImageGalleryProps) {
+export function ImageGallery({ gallery, printMode = false }: ImageGalleryProps) {
   const { isOpen, currentIndex, open, close, next, prev } = useLightbox()
   const images = gallery.images
   const total = images.length
@@ -30,6 +31,24 @@ export function ImageGallery({ gallery }: ImageGalleryProps) {
   }, [isOpen, handlePrev, handleNext])
 
   const current = images[currentIndex]
+
+  if (printMode) {
+    return (
+      <div className="space-y-0">
+        {images.map((image) => (
+          <div key={image.src} className="pdf-subsection-page">
+            <div className="flex h-full flex-col justify-center rounded-lg border border-border/30 bg-card p-3">
+              <img
+                src={image.src}
+                alt={image.alt}
+                className="mx-auto max-h-[5.5in] w-full rounded-md object-contain"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div>

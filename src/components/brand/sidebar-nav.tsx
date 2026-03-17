@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Menu } from "lucide-react"
+import { FileDown, Loader2, Menu } from "lucide-react"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { useActiveSection } from "@/hooks"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -12,7 +13,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { ThemeToggle } from "./theme-toggle"
 import type { ClientConfig, SectionMeta } from "@/lib/schema"
 
@@ -20,28 +21,20 @@ interface SidebarNavProps {
   client: ClientConfig
 }
 
-function ClientWordmark({ client }: { client: ClientConfig }) {
-  if (client.wordmarkSrc) {
+function ClientLogomark({ client }: { client: ClientConfig }) {
+  if (client.logoSrc) {
     return (
       <>
-        <img
-          src={client.wordmarkSrc}
-          alt={client.name}
-          className="h-5 w-auto dark:hidden"
-        />
-        {client.wordmarkLightSrc && (
+        <img src={client.logoSrc} alt={client.name} className="h-6 w-auto dark:hidden lg:h-8" />
+        {client.logoLightSrc && (
           <img
-            src={client.wordmarkLightSrc}
+            src={client.logoLightSrc}
             alt={client.name}
-            className="hidden h-5 w-auto dark:block"
+            className="hidden h-6 w-auto dark:block lg:h-8"
           />
         )}
       </>
     )
-  }
-
-  if (client.logoSrc) {
-    return <img src={client.logoSrc} alt={client.name} className="h-8 w-auto" />
   }
 
   return (
@@ -66,14 +59,16 @@ export function SidebarNav({ client }: SidebarNavProps) {
   const branding = (
     <div className="flex items-center justify-between px-6 py-8">
       <div>
-        <ClientWordmark client={client} />
+        <ClientLogomark client={client} />
         {client.tagline && (
           <p className="mt-2 text-xs text-muted-foreground lg:hidden">
             {client.tagline}
           </p>
         )}
       </div>
-      <ThemeToggle />
+      <div className="hidden lg:block">
+        <ThemeToggle />
+      </div>
     </div>
   )
 
@@ -92,19 +87,43 @@ export function SidebarNav({ client }: SidebarNavProps) {
     </nav>
   )
 
+  const sidebarGradientClass =
+    "bg-[linear-gradient(180deg,_#D9D9EA_0%,_#CAD5E1_100%)] dark:bg-[linear-gradient(180deg,_#121218_0%,_#171725_100%)]"
+
   return (
     <>
       {/* Desktop */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[280px] flex-col border-r border-border bg-card lg:flex">
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-40 hidden w-[280px] flex-col border-r border-border lg:flex",
+          sidebarGradientClass
+        )}
+      >
         {branding}
         <Separator />
         <ScrollArea className="flex-1 **:data-[slot=scroll-area-scrollbar]:hidden">
           {navLinks}
         </ScrollArea>
+        <Separator />
+        <div className="px-3 py-4">
+          <PdfDownloadButton
+            clientSlug={client.slug}
+            clientName={client.name}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "w-full justify-center border-border/70 bg-background/80 text-foreground dark:bg-background/45 dark:text-foreground shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-px hover:bg-background hover:shadow-md dark:hover:bg-background/60"
+            )}
+          />
+        </div>
       </aside>
 
       {/* Mobile */}
-      <div className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-border bg-card/95 px-4 backdrop-blur-sm lg:hidden">
+      <div
+        className={cn(
+          "fixed inset-x-0 top-0 z-50 flex h-14 items-center border-b border-border px-4 backdrop-blur-sm lg:hidden",
+          sidebarGradientClass
+        )}
+      >
         <div className="flex items-center">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger
@@ -112,14 +131,17 @@ export function SidebarNav({ client }: SidebarNavProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="mr-3"
+                  className="h-10 w-10"
                   aria-label="Open navigation"
                 />
               }
             >
               <Menu className="h-5 w-5" />
             </SheetTrigger>
-            <SheetContent side="left" className="flex w-[280px] flex-col p-0">
+            <SheetContent
+              side="left"
+              className={cn("flex w-[280px] flex-col p-0", sidebarGradientClass)}
+            >
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               {branding}
               <Separator />
@@ -128,12 +150,79 @@ export function SidebarNav({ client }: SidebarNavProps) {
               </ScrollArea>
             </SheetContent>
           </Sheet>
-          <ClientWordmark client={client} />
         </div>
-        <ThemeToggle />
+        <div className="pointer-events-none absolute left-1/2 -translate-x-1/2">
+          <ClientLogomark client={client} />
+        </div>
+        <div className="ml-auto">
+          <ThemeToggle />
+        </div>
       </div>
     </>
   )
+}
+
+function PdfDownloadButton({
+  clientSlug,
+  clientName,
+  className,
+}: {
+  clientSlug: string
+  clientName: string
+  className?: string
+}) {
+  const [isDownloading, setIsDownloading] = useState(false)
+
+  const handleDownload = async () => {
+    if (isDownloading) return
+    setIsDownloading(true)
+
+    try {
+      const response = await fetch(`/api/clients/${clientSlug}/pdf`)
+      if (!response.ok) {
+        const fallback = "Could not generate PDF"
+        const json = (await response.json().catch(() => null)) as
+          | { error?: string }
+          | null
+        throw new Error(json?.error ?? fallback)
+      }
+
+      const blob = await response.blob()
+      const href = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = href
+      link.download = getFileNameFromHeaders(response.headers) ?? `${clientSlug}-brand-guidelines.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(href)
+      toast.success("Brand guidelines PDF download started")
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "PDF generation failed"
+      toast.error(message)
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
+  return (
+    <Button
+      onClick={handleDownload}
+      className={className}
+      disabled={isDownloading}
+      aria-label={`Download ${clientName} brand guidelines PDF`}
+    >
+      {isDownloading ? <Loader2 className="size-4 animate-spin" /> : <FileDown className="size-4" />}
+      {isDownloading ? "Preparing PDF..." : "Download PDF"}
+    </Button>
+  )
+}
+
+function getFileNameFromHeaders(headers: Headers): string | null {
+  const contentDisposition = headers.get("content-disposition")
+  if (!contentDisposition) return null
+  const match = /filename="?([^"]+)"?/i.exec(contentDisposition)
+  return match?.[1] ?? null
 }
 
 function NavLink({

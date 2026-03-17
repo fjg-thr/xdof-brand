@@ -3,10 +3,10 @@ import type { ClientConfig } from "@/lib/schema"
 export const xdofConfig: ClientConfig = {
   slug: "xdof",
   name: "XDOF",
-  tagline: "Creative by design",
   description:
     "XDOF is a creative studio building at the intersection of design, technology, and culture.",
   logoSrc: "/clients/xdof/logos/logo-dark.svg",
+  logoLightSrc: "/clients/xdof/logos/logo-light.svg",
   wordmarkSrc: "/clients/xdof/logos/wordmark-dark.svg",
   wordmarkLightSrc: "/clients/xdof/logos/wordmark-light.svg",
 
@@ -73,22 +73,22 @@ export const xdofConfig: ClientConfig = {
     overview: {
       headline: "XDOF",
       description:
-        "A complete guide to the XDOF visual identity. This document defines the core elements of our brand — from our logo system and color palette to typography and usage guidelines. Use this as the single source of truth for all brand work.",
+        "XDOF builds robotics foundation models for real-world work: systems that tackle physical tasks people should not have to do. This guide translates that mission into a production-ready brand system for product, web, social, and internal communications.",
       values: [
         {
-          title: "Creative Precision",
+          title: "Technical Clarity",
           description:
-            "We combine creative ambition with disciplined execution. Every detail is intentional, every decision considered.",
+            "Our visual language should read like an instrument panel: precise, legible, and intentional. Typography, spacing, and hierarchy must make complex robotics work immediately understandable.",
         },
         {
-          title: "Forward Thinking",
+          title: "Future-Built Aesthetic",
           description:
-            "We design for what's next. Our work pushes boundaries while remaining grounded in craft and clarity.",
+            "The brand should feel engineered for what comes next, not generic software trends. Use contrast, structure, and restraint to communicate advanced capability without visual noise.",
         },
         {
-          title: "Built to Last",
+          title: "System-Level Consistency",
           description:
-            "We create systems, not just surfaces. Our brand is engineered for consistency and longevity across every touchpoint.",
+            "Every approved asset, token, and layout rule exists to keep execution consistent at scale. Apply the system rigorously so the brand remains coherent across every touchpoint.",
         },
       ],
     },

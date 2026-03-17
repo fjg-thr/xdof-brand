@@ -1,18 +1,36 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
+
+interface CopyOptions {
+  successMessage?: string
+}
 
 export function useCopy(timeout = 2000) {
   const [copiedValue, setCopiedValue] = useState<string | null>(null)
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (clearTimerRef.current) {
+        clearTimeout(clearTimerRef.current)
+      }
+    }
+  }, [])
 
   const copy = useCallback(
-    async (value: string) => {
+    async (value: string, options?: CopyOptions) => {
       try {
         await navigator.clipboard.writeText(value)
         setCopiedValue(value)
-        setTimeout(() => setCopiedValue(null), timeout)
+        toast.success(options?.successMessage ?? "Copied to clipboard")
+        if (clearTimerRef.current) {
+          clearTimeout(clearTimerRef.current)
+        }
+        clearTimerRef.current = setTimeout(() => setCopiedValue(null), timeout)
       } catch {
-        console.error("Failed to copy to clipboard")
+        toast.error("Could not copy value")
       }
     },
     [timeout]

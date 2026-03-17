@@ -26,10 +26,21 @@ interface ClientPageProps {
   params: Promise<{ client: string }>
 }
 
-const sectionComponent = (id: string, brand: BrandContent) => {
+const sectionComponent = (
+  id: string,
+  brand: BrandContent,
+  branding: { name: string; wordmarkSrc?: string; wordmarkLightSrc?: string }
+) => {
   switch (id) {
     case SECTION_IDS.OVERVIEW:
-      return <BrandHeader overview={brand.overview} />
+      return (
+        <BrandHeader
+          overview={brand.overview}
+          brandName={branding.name}
+          wordmarkSrc={branding.wordmarkSrc}
+          wordmarkLightSrc={branding.wordmarkLightSrc}
+        />
+      )
     case SECTION_IDS.LOGOS:
       return <LogoPreviewBlock logos={brand.logos} />
     case SECTION_IDS.MASCOT:
@@ -73,7 +84,11 @@ export default async function ClientPage({ params }: ClientPageProps) {
       {config.sections
         .filter((s) => s.enabled !== false)
         .map((section) => {
-          const content = sectionComponent(section.id, brand)
+          const content = sectionComponent(section.id, brand, {
+            name: config.name,
+            wordmarkSrc: config.wordmarkSrc,
+            wordmarkLightSrc: config.wordmarkLightSrc,
+          })
           if (!content) return null
 
           const isOverview = section.id === SECTION_IDS.OVERVIEW

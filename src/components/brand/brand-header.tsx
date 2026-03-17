@@ -2,18 +2,40 @@ import type { BrandOverview } from "@/lib/schema"
 
 interface BrandHeaderProps {
   overview: BrandOverview
+  wordmarkSrc?: string
+  wordmarkLightSrc?: string
+  brandName: string
 }
 
-export function BrandHeader({ overview }: BrandHeaderProps) {
+export function BrandHeader({
+  overview,
+  wordmarkSrc,
+  wordmarkLightSrc,
+  brandName,
+}: BrandHeaderProps) {
   return (
     <div>
       <div className="max-w-3xl">
         <p className="mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
           Brand Guidelines
         </p>
-        <h1 className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-          {overview.headline}
-        </h1>
+        <h1 className="sr-only">{overview.headline}</h1>
+        {wordmarkSrc ? (
+          <div aria-hidden>
+            <img src={wordmarkSrc} alt={brandName} className="h-10 w-auto dark:hidden md:h-12" />
+            {wordmarkLightSrc && (
+              <img
+                src={wordmarkLightSrc}
+                alt={brandName}
+                className="hidden h-10 w-auto dark:block md:h-12"
+              />
+            )}
+          </div>
+        ) : (
+          <p className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+            {overview.headline}
+          </p>
+        )}
         <p className="mt-6 text-lg leading-relaxed text-muted-foreground md:text-xl">
           {overview.description}
         </p>

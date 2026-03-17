@@ -182,9 +182,11 @@ function PdfDownloadButton({
       if (!response.ok) {
         const fallback = "Could not generate PDF"
         const json = (await response.json().catch(() => null)) as
-          | { error?: string }
+          | { error?: string; details?: string }
           | null
-        throw new Error(json?.error ?? fallback)
+        throw new Error(
+          [json?.error, json?.details].filter(Boolean).join(" — ") || fallback
+        )
       }
 
       const blob = await response.blob()

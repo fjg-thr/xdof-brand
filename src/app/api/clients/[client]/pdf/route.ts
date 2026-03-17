@@ -35,6 +35,15 @@ function getProtectionBypassHeaders(): Record<string, string> {
   }
 }
 
+function getForwardedRequestHeaders(request: Request): Record<string, string> {
+  const cookie = request.headers.get("cookie")
+  const userAgent = request.headers.get("user-agent")
+  const headers: Record<string, string> = {}
+  if (cookie) headers.cookie = cookie
+  if (userAgent) headers["user-agent"] = userAgent
+  return headers
+}
+
 function buildOrigin(request: Request): string {
   const envOrigin = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL
   if (envOrigin) return envOrigin.replace(/\/$/, "")
@@ -58,7 +67,10 @@ export async function GET(request: Request, context: RouteContext) {
   try {
     browser = await chromium.launch(await getLaunchOptions())
     const browserContext = await browser.newContext({
-      extraHTTPHeaders: getProtectionBypassHeaders(),
+      extraHTTPHeaders: {
+        ...getForwardedRequestHeaders(request),
+        ...getProtectionBypassHeaders(),
+      },
     })
     const page = await browserContext.newPage()
     const origin = buildOrigin(request)

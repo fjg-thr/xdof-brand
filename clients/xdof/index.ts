@@ -552,6 +552,11 @@ export const xdofConfig: ClientConfig = {
     gallery: {
       images: [
         {
+          src: "/clients/xdof/gallery/XDOF_APPLICATION_BRAND_F.png",
+          alt: "XDOF brand application F",
+          caption: "Brand application F",
+        },
+        {
           src: "/clients/xdof/gallery/XDOF_APPLICATION_BRAND_A.png",
           alt: "XDOF brand application A",
           caption: "Brand application A",
